@@ -1,0 +1,4 @@
+{
+  "comment": "Throwaway self-signed P-256 certificate (CN=iwa-test.invalid). Its private key was deleted after generation. publicKeySHA256 is SHA-256 of the X9.63 public key point, computed with openssl.",
+  "publicKeySHA256": "0764849dd00052c574e111d0bc1eb2c48319b999c987aaac05aaaef39af98685"
+}
