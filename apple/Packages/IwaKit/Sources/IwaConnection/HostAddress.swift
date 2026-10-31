@@ -36,6 +36,13 @@ struct HostAddress {
         return !host.contains(".") || localSuffixes.contains { host.hasSuffix($0) }
     }
 
+    /// Loopback names the device that opens it, never the server.
+    var isLoopback: Bool {
+        if let ipv4 { return ipv4[0] == 127 }
+        if let ipv6 { return ipv6 == [0, 0, 0, 0, 0, 0, 0, 1] }
+        return host == "localhost" || host.hasSuffix(".localhost")
+    }
+
     /// Hostnames and IPv6 addresses that only Tailscale uses.
     var isTailnet: Bool {
         if host.hasSuffix(".ts.net") { return true }
