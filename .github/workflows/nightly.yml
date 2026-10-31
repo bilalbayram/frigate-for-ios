@@ -1,0 +1,49 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launch:
+    name: Launch performance (Simulator, trend only)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Select the newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Generate the Xcode project
+        run: brew install xcodegen && (cd apple && xcodegen generate)
+      - name: Run launch tests
+        run: |
+          mkdir -p .build/nightly
+          device=$(xcrun simctl list devices available -j | python3 -I -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          ios = sorted(k for k in devices if "iOS" in k)
+          print(next(d["udid"] for d in devices[ios[-1]] if d["name"].startswith("iPhone")))')
+          xcodebuild -project apple/Iwa.xcodeproj -scheme Iwa -destination "platform=iOS Simulator,id=$device" \
+            -derivedDataPath .build/nightly -resultBundlePath .build/nightly/launch.xcresult \
+            CODE_SIGNING_ALLOWED=NO test 2>&1 | tee .build/nightly/test.log | grep -E "measured|Test Case|TEST (SUCCEEDED|FAILED)"
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Launch (Simulator, trend only until the device lab exists)"
+            echo '```'
+            grep -E "measured \[" .build/nightly/test.log || echo "no measurements"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: launch-xcresult
+          path: .build/nightly/launch.xcresult
+          retention-days: 14

@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Third-party code is kept to actions/checkout (pinned by commit). Tools come from the runner image
+# or from pinned, checksum-verified releases.
+
+jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      apple: ${{ steps.detect.outputs.apple }}
+      server: ${{ steps.detect.outputs.server }}
+      base: ${{ steps.detect.outputs.base }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+      - id: detect
+        name: Detect affected jobs
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          base="$PUSH_BEFORE"; [ "$EVENT" = pull_request ] && base="$PR_BASE"
+          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            changed=$(git ls-files); base=""
+          else
+            changed=$(git diff --name-only "$base" HEAD)
+          fi
+          has() { printf '%s\n' "$changed" | grep -Eq "$1" && echo true || echo false; }
+          {
+            echo "base=$base"
+            echo "apple=$(has '^(apple/|scripts/|budgets/|\.swift-format$|\.swiftlint\.yml$|\.github/workflows/ci\.yml$)')"
+            echo "server=$(has '^(server/|fixtures/|scripts/check-repo-hygiene$|\.github/workflows/ci\.yml$)')"
+          } >> "$GITHUB_OUTPUT"
+
+  hygiene:
+    name: Hygiene
+    needs: changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+      - name: Repo hygiene
+        run: scripts/check-repo-hygiene
+      - name: Secret scan (gitleaks 8.30.1)
+        run: |
+          curl -fsSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks && rm gitleaks.tgz
+          ./gitleaks git --redact --no-banner .
+      - name: Budgets only grow with a label
+        if: github.event_name == 'pull_request' && needs.changes.outputs.base != ''
+        env:
+          BASE: ${{ needs.changes.outputs.base }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          if scripts/check-budget-growth "$BASE"; then exit 0; fi
+          for label in size-increase perf-increase wire-increase; do
+            if printf '%s' "$LABELS" | grep -q "\"$label\""; then echo "Growth accepted by the $label label."; exit 0; fi
+          done
+          exit 1
+      - name: Privacy-sensitive changes need review
+        if: github.event_name == 'pull_request' && needs.changes.outputs.base != ''
+        env:
+          BASE: ${{ needs.changes.outputs.base }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          files=$(git diff --name-only "$BASE" HEAD | grep -E '(\.entitlements|\.xcprivacy|/Info\.plist|^scripts/check-app-bundle)$' || true)
+          keys=$(git diff "$BASE" HEAD -- apple/project.yml | grep -E '^[+-] .*(INFOPLIST_KEY_NS|ENABLE_|ENTITLEMENTS|UIBackgroundModes|BackgroundModes)' || true)
+          if [ -z "$files$keys" ]; then exit 0; fi
+          printf 'Changes to permissions, entitlements, ATS, the privacy manifest, or the framework allowlist:\n%s\n%s\n' "$files" "$keys"
+          if printf '%s' "$LABELS" | grep -q '"privacy-reviewed"'; then echo "Accepted by the privacy-reviewed label."; exit 0; fi
+          echo "::error::These changes need a maintainer to review them and add the privacy-reviewed label."
+          exit 1
+
+  apple:
+    name: Apple (lint, test, build)
+    needs: changes
+    if: needs.changes.outputs.apple == 'true'
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Select the newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+      - name: Install tools
+        run: brew install xcodegen swiftlint
+      - name: swift-format
+        run: swift format lint --strict -r apple
+      - name: SwiftLint
+        run: swiftlint lint --strict --quiet
+      - name: IwaKit tests
+        working-directory: apple/Packages/IwaKit
+        run: swift test
+      - name: Generate the Xcode project
+        working-directory: apple
+        run: xcodegen generate
+      - name: Build for every platform
+        run: |
+          for destination in "generic/platform=iOS Simulator" "generic/platform=macOS" "generic/platform=tvOS Simulator"; do
+            echo "::group::$destination"
+            xcodebuild -project apple/Iwa.xcodeproj -scheme Iwa -destination "$destination" \
+              -derivedDataPath .build/ci CODE_SIGNING_ALLOWED=NO build -quiet
+            echo "::endgroup::"
+          done
+      - name: App bundle guardrails
+        run: |
+          scripts/check-app-bundle \
+            .build/ci/Build/Products/Debug-iphonesimulator/Iwa.app \
+            .build/ci/Build/Products/Debug/Iwa.app \
+            .build/ci/Build/Products/Debug-appletvsimulator/Iwa.app
+      - name: App size budget
+        run: scripts/app-size
+
+  rust:
+    name: Rust
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Toolchain
+        run: |
+          rustup toolchain install stable --profile minimal -c rustfmt,clippy -t wasm32-unknown-unknown
+          rustup default stable
+      - name: rustfmt
+        run: cargo fmt --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test
+      - name: iwa-protocol builds for wasm32 (the relay target)
+        run: cargo build -p iwa-protocol --target wasm32-unknown-unknown
