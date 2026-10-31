@@ -115,7 +115,9 @@ Vendored skills stay unmodified. Update one by copying it again from upstream, r
 
 ## Pull requests
 
-- Never open a PR unless asked.
+- `master` is protected: every change lands through a pull request with green CI (Changes, Hygiene, Apple, Rust), admins included. No force pushes.
+- Branch names: `<type>/<topic>`, e.g. `feat/frigate-login`. Squash-merge.
 - Use conventional commit titles: `fix(connection): never reuse HTTPS tokens on learned HTTP routes`.
+- Budget growth needs its label (`size-increase`, `perf-increase`, `wire-increase`); permission, entitlement, ATS, privacy-manifest, or framework-allowlist changes need `privacy-reviewed`. A maintainer adds labels; don't add them to your own PR.
 - UI changes need before and after screenshots for each affected platform. Motion needs a short video.
 - One request is one PR.
