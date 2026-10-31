@@ -1,0 +1,38 @@
+# Local planning docs (kept out of git on purpose)
+/docs/
+
+# Agent skills live in .agents/skills; .claude/skills is a symlink to them.
+# Other .claude files stay local. (Overrides global `.agents` and `.claude` ignores.)
+!/.agents/
+/.agents/*
+!/.agents/skills/
+!/.claude/
+/.claude/*
+!/.claude/skills
+
+# macOS
+.DS_Store
+
+# Xcode (project is generated from apple/project.yml by XcodeGen)
+apple/*.xcodeproj/
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved.bak
+
+# Rust
+/server/target/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# Secrets
+*.p8
+*.pem
+.env
+.env.*

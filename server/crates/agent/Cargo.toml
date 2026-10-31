@@ -1,0 +1,10 @@
+[package]
+name = "iwa-agent"
+description = "Sidecar that runs next to Frigate: pairing, push, and Iwa Connect"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+iwa-protocol.workspace = true

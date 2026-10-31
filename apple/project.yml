@@ -1,0 +1,61 @@
+name: Iwa
+options:
+  bundleIdPrefix: com.bilalbayram
+  deploymentTarget:
+    iOS: "26.0"
+    macOS: "26.0"
+    tvOS: "26.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+
+packages:
+  IwaKit:
+    path: Packages/IwaKit
+
+targets:
+  Iwa:
+    type: application
+    supportedDestinations: [iOS, macOS, tvOS]
+    sources: [Iwa]
+    dependencies:
+      - package: IwaKit
+        product: FrigateAPI
+      - package: IwaKit
+        product: IwaConnection
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bilalbayram.iwa
+        PRODUCT_NAME: Iwa
+        INFOPLIST_KEY_CFBundleDisplayName: Iwa
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1,2,3"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: "Iwa connects to your Frigate server on your local network."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Iwa uses the microphone for two-way audio with your cameras."
+        INFOPLIST_KEY_NSCameraUsageDescription: "Iwa uses the camera to scan pairing QR codes."
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        ENABLE_APP_SANDBOX[sdk=macosx*]: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS[sdk=macosx*]: YES
+        ENABLE_RESOURCE_ACCESS_AUDIO_INPUT[sdk=macosx*]: YES
+        ENABLE_RESOURCE_ACCESS_CAMERA[sdk=macosx*]: YES
+        ENABLE_HARDENED_RUNTIME[sdk=macosx*]: YES
+
+schemes:
+  Iwa:
+    build:
+      targets:
+        Iwa: all
+    test:
+      targets: []
