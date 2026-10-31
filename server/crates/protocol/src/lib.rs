@@ -93,14 +93,27 @@ mod tests {
             labels: &["person"],
             severity: Severity::Alert,
         };
-        assert!(!rule().matches(&ReviewItem { camera: "garage", ..base.clone() }));
-        assert!(!rule().matches(&ReviewItem { severity: Severity::Detection, ..base.clone() }));
-        assert!(!rule().matches(&ReviewItem { labels: &["car"], ..base }));
+        assert!(!rule().matches(&ReviewItem {
+            camera: "garage",
+            ..base.clone()
+        }));
+        assert!(!rule().matches(&ReviewItem {
+            severity: Severity::Detection,
+            ..base.clone()
+        }));
+        assert!(!rule().matches(&ReviewItem {
+            labels: &["car"],
+            ..base
+        }));
     }
 
     #[test]
     fn empty_filters_match_everything() {
-        let rule = NotificationRule { cameras: vec![], labels: vec![], ..rule() };
+        let rule = NotificationRule {
+            cameras: vec![],
+            labels: vec![],
+            ..rule()
+        };
         let item = ReviewItem {
             camera: "anything",
             zones: &[],
