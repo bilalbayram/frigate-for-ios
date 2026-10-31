@@ -1,0 +1,302 @@
+#!/usr/bin/env -S python3 -I
+"""Turns a raw Frigate capture into a fixture that is safe to commit.
+
+Usage: scripts/sanitize-frigate-capture .local/frigate-captures/<version> [fixtures/frigate]
+
+Allowlist, not blocklist: only fields Iwa models are kept, so a secret in a field nobody looked
+at can't slip through. Then every camera, zone, ID, plate, sub-label, host and IP is renamed,
+thumbnails are dropped, timestamps are shifted to 2030, and long lists are trimmed. Finally the
+output is searched for every original sensitive string; any hit aborts without writing.
+"""
+
+import ipaddress
+import json
+import re
+import shutil
+import sys
+import tempfile
+from datetime import date, timedelta
+from pathlib import Path
+
+EPOCH_TARGET = 1_893_456_000.0  # 2030-01-01T00:00:00Z: the newest timestamp lands just before this.
+LIST_LIMIT = 10
+
+
+def pick(source, schema):
+    """Keeps only the keys in `schema` (nested dicts recurse; True keeps the value as is)."""
+    if not isinstance(source, dict):
+        return source
+    kept = {}
+    for key, rule in schema.items():
+        if key not in source:
+            continue
+        value = source[key]
+        kept[key] = pick(value, rule) if isinstance(rule, dict) else value
+    return kept
+
+
+CAMERA_SCHEMA = {
+    "name": True, "enabled": True, "enabled_in_config": True, "type": True,
+    "detect": {"enabled": True, "width": True, "height": True, "fps": True},
+    "record": {"enabled": True, "enabled_in_config": True},
+    "audio": {"enabled": True, "enabled_in_config": True},
+    "snapshots": {"enabled": True},
+    "birdseye": {"enabled": True},
+    "lpr": {"enabled": True},
+    "face_recognition": {"enabled": True},
+    "semantic_search": {"enabled": True},
+    "live": {"streams": True, "height": True, "quality": True},
+    "onvif": {"host": True, "port": True, "autotracking": {"enabled": True}},
+    "ui": {"order": True, "dashboard": True},
+    "review": {"alerts": {"labels": True, "required_zones": True}, "detections": {"labels": True, "required_zones": True}},
+    "objects": {"track": True},
+    "notifications": {"enabled": True},
+    "zones": True,  # Reduced to names below.
+}
+CONFIG_SCHEMA = {
+    "version": True,
+    "auth": {"enabled": True},
+    "semantic_search": {"enabled": True},
+    "face_recognition": {"enabled": True},
+    "lpr": {"enabled": True},
+    "birdseye": {"enabled": True},
+    "notifications": {"enabled": True},
+    "mqtt": {"enabled": True},
+    "ui": {"time_format": True, "unit_system": True},
+    "camera_groups": True,
+    "go2rtc": {"streams": True},
+    "cameras": True,
+}
+REVIEW_SCHEMA = {
+    "id": True, "camera": True, "start_time": True, "end_time": True, "severity": True,
+    "has_been_reviewed": True, "thumb_path": True,
+    "data": {"objects": True, "zones": True, "audio": True, "sub_labels": True, "detections": True,
+             "verified_objects": True, "thumb_time": True},
+}
+EVENT_SCHEMA = {
+    "id": True, "camera": True, "label": True, "sub_label": True, "zones": True, "start_time": True,
+    "end_time": True, "has_clip": True, "has_snapshot": True, "top_score": True, "false_positive": True,
+    "retain_indefinitely": True, "plus_id": True,
+    "data": {"score": True, "top_score": True, "type": True, "box": True, "region": True},
+}
+TIMELINE_SCHEMA = {
+    "timestamp": True, "camera": True, "source": True, "source_id": True, "class_type": True,
+    "data": {"label": True, "sub_label": True, "box": True, "region": True, "score": True},
+}
+STATS_CAMERA_SCHEMA = {k: True for k in ["camera_fps", "process_fps", "skipped_fps", "detection_fps", "detection_enabled",
+                                          "expected_fps", "connection_quality", "reconnects_last_hour", "stalls_last_hour"]}
+
+
+class Renamer:
+    """Stable fake names per category, so references between files stay consistent."""
+
+    def __init__(self):
+        self.maps: dict[str, dict[str, str]] = {}
+        self.sensitive: set[str] = set()
+
+    def name(self, category: str, original, prefix: str | None = None) -> str:
+        original = str(original)
+        table = self.maps.setdefault(category, {})
+        if original not in table:
+            table[original] = f"{prefix or category}_{len(table) + 1}"
+            if len(original) >= 3:
+                self.sensitive.add(original)
+        return table[original]
+
+    def plate(self, original) -> str:
+        table = self.maps.setdefault("plate", {})
+        if original not in table:
+            table[original] = f"TEST{len(table) + 1:03d}"
+            if len(str(original)) >= 3:
+                self.sensitive.add(str(original))
+        return table[original]
+
+
+def ip_replacement(match: re.Match, renamer: Renamer) -> str:
+    try:
+        ipaddress.ip_address(match.group(0))
+    except ValueError:
+        return match.group(0)
+    renamer.sensitive.add(match.group(0))
+    table = renamer.maps.setdefault("ip", {})
+    table.setdefault(match.group(0), f"192.0.2.{len(table) + 1}")  # TEST-NET-1
+    return table[match.group(0)]
+
+
+def scrub_text(text: str, renamer: Renamer) -> str:
+    text = re.sub(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", lambda m: ip_replacement(m, renamer), text)
+    for category in ("camera", "zone", "id", "group"):
+        for original, fake in sorted(renamer.maps.get(category, {}).items(), key=lambda kv: -len(kv[0])):
+            text = text.replace(original, fake)
+    return text
+
+
+def sanitize(raw: Path) -> tuple[dict[str, object], Renamer]:
+    load = lambda name: json.loads((raw / f"{name}.json").read_text()) if (raw / f"{name}.json").exists() else None
+    r = Renamer()
+    config = load("config") or {}
+
+    # Collect names first, so every later reference is renamed consistently.
+    for original in (config.get("cameras") or {}):
+        r.name("camera", original)
+    for original in (config.get("camera_groups") or {}):
+        r.name("group", original, "group")
+    for camera in (config.get("cameras") or {}).values():
+        for zone in (camera.get("zones") or {}):
+            r.name("zone", zone)
+    for plate in load("recognized_license_plates") or []:
+        r.plate(plate)
+    for label in load("sub_labels") or []:
+        r.name("sub_label", label, "person")
+
+    def sub_label(value):
+        if value is None:
+            return None
+        if isinstance(value, list):  # [name, score]
+            return [sub_label(value[0]), *value[1:]] if value else value
+        if value in r.maps.get("plate", {}):
+            return r.plate(value)
+        return r.name("sub_label", value, "person")
+
+    events = (load("events_limit_50") or [])[:LIST_LIMIT]
+    reviews = (load("review_limit_50") or [])[:LIST_LIMIT]
+    timeline = (load("timeline_limit_50") or [])[:LIST_LIMIT]
+    for item in events + reviews:
+        r.name("id", item["id"], "id")
+    for item in timeline:
+        r.name("id", item["source_id"], "id")
+
+    timestamps = [x for item in events + reviews for x in (item.get("start_time"), item.get("end_time")) if x]
+    timestamps += [item["timestamp"] for item in timeline]
+    shift_days = int((EPOCH_TARGET - max(timestamps, default=EPOCH_TARGET)) // 86_400)
+    shift = shift_days * 86_400
+
+    def at(value):
+        return None if value is None else round(value + shift, 6)
+
+    out: dict[str, object] = {}
+
+    cameras = {}
+    for original, camera in (config.get("cameras") or {}).items():
+        kept = pick(camera, CAMERA_SCHEMA)
+        kept["name"] = r.name("camera", original)
+        kept["zones"] = {r.name("zone", z): {} for z in (camera.get("zones") or {})}
+        if (kept.get("onvif") or {}).get("host"):
+            kept["onvif"]["host"] = "192.0.2.200"
+            r.sensitive.add(camera["onvif"]["host"])
+        live = kept.get("live") or {}
+        live["streams"] = {label: r.name("camera", stream) for label, stream in (live.get("streams") or {}).items()}
+        for review_kind in ("alerts", "detections"):
+            zones = ((kept.get("review") or {}).get(review_kind) or {}).get("required_zones")
+            if zones:
+                kept["review"][review_kind]["required_zones"] = [r.name("zone", z) for z in zones]
+        cameras[r.name("camera", original)] = kept
+    config_out = pick(config, CONFIG_SCHEMA)
+    config_out["cameras"] = cameras
+    config_out["camera_groups"] = {
+        r.name("group", g, "group"): {"cameras": [r.name("camera", c) for c in (v.get("cameras") or [])],
+                                       "icon": v.get("icon"), "order": v.get("order")}
+        for g, v in (config.get("camera_groups") or {}).items()
+    }
+    if "go2rtc" in config_out:
+        config_out["go2rtc"] = {"streams": {r.name("camera", s): ["rtsp://camera.invalid/stream"]
+                                            for s in ((config.get("go2rtc") or {}).get("streams") or {})}}
+    out["config"] = config_out
+
+    if (version := (raw / "version.json")).exists():
+        out["version"] = version.read_text().strip()
+
+    out["review"] = []
+    for item in reviews:
+        kept = pick(item, REVIEW_SCHEMA)
+        kept["id"] = r.name("id", item["id"], "id")
+        kept["camera"] = r.name("camera", item["camera"])
+        kept["start_time"], kept["end_time"] = at(item.get("start_time")), at(item.get("end_time"))
+        kept["thumb_path"] = f"/media/frigate/clips/review/thumb-{kept['camera']}-{kept['id']}.webp"
+        data = kept.get("data") or {}
+        data["zones"] = [r.name("zone", z) for z in data.get("zones") or []]
+        data["sub_labels"] = [sub_label(s) for s in data.get("sub_labels") or []]
+        data["detections"] = [r.name("id", d, "id") for d in data.get("detections") or []]
+        if data.get("thumb_time"):
+            data["thumb_time"] = at(data["thumb_time"])
+        out["review"].append(kept)
+
+    if (summary := load("review_summary")) is not None:
+        def shifted(day: str) -> str:
+            return (date.fromisoformat(day) + timedelta(days=shift_days)).isoformat()
+        out["review_summary"] = {
+            (key if key == "last24Hours" else shifted(key)):
+                {**value, **({"day": shifted(value["day"])} if "day" in value else {})}
+            for key, value in summary.items()
+        }
+
+    out["events"] = []
+    for item in events:
+        kept = pick(item, EVENT_SCHEMA)
+        kept.update(id=r.name("id", item["id"], "id"), camera=r.name("camera", item["camera"]),
+                    sub_label=sub_label(item.get("sub_label")), zones=[r.name("zone", z) for z in item.get("zones") or []],
+                    start_time=at(item.get("start_time")), end_time=at(item.get("end_time")))
+        out["events"].append(kept)
+
+    out["timeline"] = []
+    for item in timeline:
+        kept = pick(item, TIMELINE_SCHEMA)
+        kept.update(timestamp=at(item["timestamp"]), camera=r.name("camera", item["camera"]),
+                    source_id=r.name("id", item["source_id"], "id"))
+        if (kept.get("data") or {}).get("sub_label") is not None:
+            kept["data"]["sub_label"] = sub_label(kept["data"]["sub_label"])
+        out["timeline"].append(kept)
+
+    if (labels := load("labels")) is not None:
+        out["labels"] = labels
+    if (plates := load("recognized_license_plates")) is not None:
+        out["recognized_license_plates"] = [r.plate(p) for p in plates[:5]]
+    if (streams := load("go2rtc_streams")) is not None:
+        out["go2rtc_streams"] = {r.name("camera", s): {} for s in streams}
+    if (stats := load("stats")) is not None:
+        out["stats"] = {
+            "cameras": {r.name("camera", c): pick(v, STATS_CAMERA_SCHEMA) for c, v in (stats.get("cameras") or {}).items()},
+            "detectors": {f"detector_{i + 1}": {"inference_speed": v.get("inference_speed")}
+                          for i, v in enumerate((stats.get("detectors") or {}).values())},
+            "detection_fps": stats.get("detection_fps"),
+            "service": pick(stats.get("service") or {}, {"version": True, "latest_version": True, "uptime": True}),
+        }
+    if (storage := load("recordings_storage")) is not None:
+        out["recordings_storage"] = {r.name("camera", c): v for c, v in storage.items()}
+
+    out = {name: json.loads(scrub_text(json.dumps(value), r)) for name, value in out.items()}
+    return out, r
+
+
+def leaks(out: dict[str, object], renamer: Renamer) -> list[str]:
+    text = json.dumps(out).lower()
+    return sorted(s for s in renamer.sensitive if s.lower() in text)
+
+
+def main() -> int:
+    if len(sys.argv) not in (2, 3):
+        print(__doc__.strip().splitlines()[2], file=sys.stderr)
+        return 2
+    raw = Path(sys.argv[1])
+    out_root = Path(sys.argv[2]) if len(sys.argv) == 3 else Path(__file__).resolve().parent.parent / "fixtures" / "frigate"
+    out, renamer = sanitize(raw)
+    if found := leaks(out, renamer):
+        print(f"error: {len(found)} sensitive value(s) survived sanitizing; nothing written. Fix the sanitizer.", file=sys.stderr)
+        return 1
+    version = str(out.get("version", raw.name)).split("-")[0]
+    target = out_root / version
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, value in out.items():
+            if name == "version":
+                (Path(tmp) / "version.txt").write_text(f"{value}\n")
+            else:
+                (Path(tmp) / f"{name}.json").write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(tmp, target)
+    print(f"Wrote {len(out)} fixture files to {target} ({len(renamer.sensitive)} sensitive values renamed, none left)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

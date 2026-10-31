@@ -1,0 +1,22 @@
+{
+  "2029-12-21": {
+    "day": "2029-12-21",
+    "reviewed_alert": 0,
+    "reviewed_detection": 0,
+    "total_alert": 23,
+    "total_detection": 3
+  },
+  "2029-12-31": {
+    "day": "2029-12-31",
+    "reviewed_alert": 0,
+    "reviewed_detection": 0,
+    "total_alert": 12,
+    "total_detection": 0
+  },
+  "last24Hours": {
+    "reviewed_alert": 0,
+    "reviewed_detection": 0,
+    "total_alert": 12,
+    "total_detection": 0
+  }
+}

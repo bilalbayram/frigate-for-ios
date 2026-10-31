@@ -1,0 +1,310 @@
+[
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.6436011904761905,
+        0.2894736842105263,
+        0.18229166666666666,
+        0.21578947368421053
+      ],
+      "region": [
+        0.4069940476190476,
+        0.035526315789473684,
+        0.41964285714285715,
+        0.7421052631578947
+      ],
+      "score": 0.86328125,
+      "top_score": 0.857177734375,
+      "type": "object"
+    },
+    "end_time": 1893434423.426624,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_1",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434419.824058,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.5342261904761905,
+        0.3026315789473684,
+        0.2604166666666667,
+        0.16842105263157894
+      ],
+      "region": [
+        0.0,
+        0.0,
+        0.8125,
+        1.436842105263158
+      ],
+      "score": 0.86572265625,
+      "top_score": 0.861328125,
+      "type": "object"
+    },
+    "end_time": 1893434414.027542,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_2",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434410.423936,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.40476190476190477,
+        0.32105263157894737,
+        0.11011904761904762,
+        0.07105263157894737
+      ],
+      "region": [
+        0.359375,
+        0.15394736842105264,
+        0.22321428571428573,
+        0.39473684210526316
+      ],
+      "score": 0.861328125,
+      "top_score": 0.82080078125,
+      "type": "object"
+    },
+    "end_time": 1893434389.024131,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_3",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434380.227572,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_1",
+    "data": {
+      "score": 0.9372558742761612,
+      "top_score": 0.9372558742761612,
+      "type": "api"
+    },
+    "end_time": 1893434247.006453,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_4",
+    "label": "license_plate",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434232.969889,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.6480654761904762,
+        0.3,
+        0.2961309523809524,
+        0.2394736842105263
+      ],
+      "region": [
+        0.0,
+        0.0,
+        1.0148809523809523,
+        1.7947368421052632
+      ],
+      "score": 0.85888671875,
+      "top_score": 0.810546875,
+      "type": "object"
+    },
+    "end_time": 1893434194.423751,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_5",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434190.023879,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.4055059523809524,
+        0.31973684210526315,
+        0.11383928571428571,
+        0.07368421052631578
+      ],
+      "region": [
+        0.390625,
+        0.15526315789473685,
+        0.22321428571428573,
+        0.39473684210526316
+      ],
+      "score": 0.9453125,
+      "top_score": 0.8330078125,
+      "type": "object"
+    },
+    "end_time": 1893434184.023984,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_6",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434179.626531,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.47023809523809523,
+        0.3118421052631579,
+        0.12872023809523808,
+        0.08289473684210526
+      ],
+      "region": [
+        0.41964285714285715,
+        0.011842105263157895,
+        0.22321428571428573,
+        0.39473684210526316
+      ],
+      "score": 0.97412109375,
+      "top_score": 0.86181640625,
+      "type": "object"
+    },
+    "end_time": 1893434163.224657,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_7",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893434158.027326,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.4479166666666667,
+        0.30526315789473685,
+        0.14360119047619047,
+        0.08552631578947369
+      ],
+      "region": [
+        0.44642857142857145,
+        0.15657894736842104,
+        0.22321428571428573,
+        0.39473684210526316
+      ],
+      "score": 0.81787109375,
+      "top_score": 0.75341796875,
+      "type": "object"
+    },
+    "end_time": 1893433416.631668,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_8",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893433414.229108,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.5744047619047619,
+        0.22105263157894736,
+        0.3177083333333333,
+        0.36578947368421055
+      ],
+      "region": [
+        0.0,
+        0.0,
+        0.8928571428571429,
+        1.5789473684210527
+      ],
+      "score": 0.572265625,
+      "top_score": 0.74169921875,
+      "type": "object"
+    },
+    "end_time": 1893432598.233893,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_9",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893432593.833185,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  },
+  {
+    "camera": "camera_8",
+    "data": {
+      "box": [
+        0.6101190476190477,
+        0.32763157894736844,
+        0.29017857142857145,
+        0.19078947368421054
+      ],
+      "region": [
+        0.5074404761904762,
+        0.05526315789473684,
+        0.3958333333333333,
+        0.7
+      ],
+      "score": 0.85498046875,
+      "top_score": 0.859619140625,
+      "type": "object"
+    },
+    "end_time": 1893432591.830668,
+    "false_positive": null,
+    "has_clip": false,
+    "has_snapshot": true,
+    "id": "id_10",
+    "label": "car",
+    "plus_id": null,
+    "retain_indefinitely": false,
+    "start_time": 1893432582.233688,
+    "sub_label": null,
+    "top_score": null,
+    "zones": []
+  }
+]

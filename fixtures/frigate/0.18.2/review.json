@@ -1,0 +1,264 @@
+[
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_25",
+        "id_26",
+        "id_27",
+        "id_28",
+        "id_29",
+        "id_30",
+        "id_31"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893424375.032728,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893424420.149413,
+    "has_been_reviewed": false,
+    "id": "id_11",
+    "severity": "alert",
+    "start_time": 1893424299.747817,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_11.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_32",
+        "id_26",
+        "id_33",
+        "id_34",
+        "id_35",
+        "id_36"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893424096.811507,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893424232.947095,
+    "has_been_reviewed": false,
+    "id": "id_12",
+    "severity": "alert",
+    "start_time": 1893424093.545917,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_12.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_37"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893422376.752705,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893422431.541993,
+    "has_been_reviewed": false,
+    "id": "id_13",
+    "severity": "alert",
+    "start_time": 1893422376.53961,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_13.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_38",
+        "id_39"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893420344.146977,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893420383.936182,
+    "has_been_reviewed": false,
+    "id": "id_14",
+    "severity": "alert",
+    "start_time": 1893420343.936279,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_14.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_40",
+        "id_41"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893420036.361775,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893420062.339431,
+    "has_been_reviewed": false,
+    "id": "id_15",
+    "severity": "alert",
+    "start_time": 1893420034.750038,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_15.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_42"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893419910.799516,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893419924.325211,
+    "has_been_reviewed": false,
+    "id": "id_16",
+    "severity": "alert",
+    "start_time": 1893419910.546945,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_16.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_43",
+        "id_44",
+        "id_45",
+        "id_46"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893419310.392907,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893419343.147293,
+    "has_been_reviewed": false,
+    "id": "id_17",
+    "severity": "alert",
+    "start_time": 1893419293.954424,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_17.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_47",
+        "id_48",
+        "id_49",
+        "id_50"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893418928.807072,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893419018.143797,
+    "has_been_reviewed": false,
+    "id": "id_18",
+    "severity": "alert",
+    "start_time": 1893418923.754802,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_18.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_51",
+        "id_52",
+        "id_53"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893418733.630515,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893418764.959023,
+    "has_been_reviewed": false,
+    "id": "id_19",
+    "severity": "alert",
+    "start_time": 1893418732.802607,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_19.webp"
+  },
+  {
+    "camera": "camera_7",
+    "data": {
+      "audio": [],
+      "detections": [
+        "id_54",
+        "id_55"
+      ],
+      "objects": [
+        "person"
+      ],
+      "sub_labels": [],
+      "thumb_time": 1893418341.015016,
+      "verified_objects": [],
+      "zones": [
+        "zone_1"
+      ]
+    },
+    "end_time": 1893418427.75232,
+    "has_been_reviewed": false,
+    "id": "id_20",
+    "severity": "alert",
+    "start_time": 1893418340.76619,
+    "thumb_path": "/media/frigate/clips/review/thumb-camera_7-id_20.webp"
+  }
+]

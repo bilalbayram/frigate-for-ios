@@ -1,0 +1,47 @@
+{
+  "camera_1": {
+    "bandwidth": 581.5,
+    "usage": 5.140000000000001,
+    "usage_percent": 0.0010740487668290278
+  },
+  "camera_10": {
+    "bandwidth": 0,
+    "usage": null
+  },
+  "camera_2": {
+    "bandwidth": 0,
+    "usage": null
+  },
+  "camera_3": {
+    "bandwidth": 292.97,
+    "usage": 3784.12,
+    "usage_percent": 0.7907255680025409
+  },
+  "camera_4": {
+    "bandwidth": 1326.97,
+    "usage": 31545.21,
+    "usage_percent": 6.591652509700917
+  },
+  "camera_5": {
+    "bandwidth": 0,
+    "usage": null
+  },
+  "camera_6": {
+    "bandwidth": 0,
+    "usage": null
+  },
+  "camera_7": {
+    "bandwidth": 867.66,
+    "usage": 2007.72,
+    "usage_percent": 0.4195309708439642
+  },
+  "camera_8": {
+    "bandwidth": 2349.65,
+    "usage": 467.13,
+    "usage_percent": 0.0976109728499696
+  },
+  "camera_9": {
+    "bandwidth": 0,
+    "usage": null
+  }
+}

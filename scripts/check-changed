@@ -49,7 +49,12 @@ if touched '\.swift$' || touched "$lint_config"; then
   fi
 fi
 
-if touched '^apple/Packages/IwaKit/'; then
+if touched '^scripts/'; then
+  step "script tests"
+  python3 -I -m unittest discover -s scripts/tests -q
+fi
+
+if touched '^(apple/Packages/IwaKit/|fixtures/)'; then
   step "IwaKit tests"
   (cd apple/Packages/IwaKit && swift test --quiet)
 fi

@@ -36,3 +36,6 @@ Package.resolved.bak
 *.pem
 .env
 .env.*
+
+# Raw captures from real Frigate instances. Never commit: camera names, faces, plates, IPs.
+/.local/

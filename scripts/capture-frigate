@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Records read-only Frigate API responses for fixtures.
+#
+# Usage: scripts/capture-frigate http://frigate.local:5000
+#        scripts/capture-frigate https://frigate.local:8971 "<frigate_token cookie value>"
+#
+# Writes raw responses to .local/frigate-captures/<version>/ (gitignored). Raw captures contain camera
+# names, plates, hosts and thumbnails: never commit them. Turn them into fixtures with
+# scripts/sanitize-frigate-capture. Only GET requests on metadata endpoints; no images or video.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+base=${1:?usage: scripts/capture-frigate <base-url> [token]}
+base=${base%/}
+token=${2:-}
+curl_args=(-sS -f -m 30 -k)
+[ -n "$token" ] && curl_args+=(-H "Cookie: frigate_token=$token")
+
+version=$(curl "${curl_args[@]}" "$base/api/version")
+out=".local/frigate-captures/$version"
+mkdir -p "$out"
+
+endpoints=(
+  version config stats labels sub_labels recognized_license_plates go2rtc/streams recordings/storage
+  "review?limit=50" review/summary "events?limit=50" "timeline?limit=50"
+)
+for endpoint in "${endpoints[@]}"; do
+  file="$out/$(printf '%s' "$endpoint" | tr '/?=&' '____').json"
+  if curl "${curl_args[@]}" -o "$file" "$base/api/$endpoint"; then
+    printf '  %-28s %8s bytes\n' "$endpoint" "$(wc -c < "$file" | tr -d ' ')"
+  else
+    printf '  %-28s unavailable on this version\n' "$endpoint"; rm -f "$file"
+  fi
+done
+echo "Raw capture in $out (gitignored). Next: scripts/sanitize-frigate-capture $out"

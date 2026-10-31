@@ -1,0 +1,746 @@
+{
+  "auth": {
+    "enabled": true
+  },
+  "birdseye": {
+    "enabled": true
+  },
+  "camera_groups": {},
+  "cameras": {
+    "camera_1": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": true,
+        "fps": 5,
+        "height": 1080,
+        "width": 1920
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_1": "camera_1"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_1",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": true
+      },
+      "type": "lpr",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_10": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 1440,
+        "width": 2560
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_10": "camera_10"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_10",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_2": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 1520,
+        "width": 2592
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_2": "camera_2"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_2",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": true
+      },
+      "type": "lpr",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_3": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 3840,
+        "width": 2160
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_3": "camera_3"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_3",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": true,
+        "enabled_in_config": true
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_4": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 1520,
+        "width": 2688
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_4": "camera_4"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_4",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": true,
+        "enabled_in_config": true
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_5": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 1080,
+        "width": 1920
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_5": "camera_5"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_5",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_6": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 720,
+        "width": 1280
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_6": "camera_6"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_6",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_7": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": true,
+        "fps": 5,
+        "height": 1080,
+        "width": 1920
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_7": "camera_7"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_7",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": [
+          "person"
+        ]
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": true,
+        "enabled_in_config": true
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": [
+            "zone_1"
+          ]
+        },
+        "detections": {
+          "required_zones": [
+            "zone_1"
+          ]
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": true
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {
+        "zone_1": {}
+      }
+    },
+    "camera_8": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": true,
+        "fps": 5,
+        "height": 760,
+        "width": 1344
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_8": "camera_8"
+        }
+      },
+      "lpr": {
+        "enabled": false
+      },
+      "name": "camera_8",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": [
+          "car",
+          "motorcycle",
+          "bus"
+        ]
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": true
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    },
+    "camera_9": {
+      "audio": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "birdseye": {
+        "enabled": true
+      },
+      "detect": {
+        "enabled": false,
+        "fps": 5,
+        "height": 360,
+        "width": 640
+      },
+      "enabled": true,
+      "enabled_in_config": true,
+      "face_recognition": {
+        "enabled": false
+      },
+      "live": {
+        "height": 720,
+        "quality": 8,
+        "streams": {
+          "camera_9": "camera_9"
+        }
+      },
+      "lpr": {
+        "enabled": true
+      },
+      "name": "camera_9",
+      "notifications": {
+        "enabled": false
+      },
+      "objects": {
+        "track": []
+      },
+      "onvif": {
+        "autotracking": {
+          "enabled": false
+        },
+        "host": "",
+        "port": 8000
+      },
+      "record": {
+        "enabled": false,
+        "enabled_in_config": false
+      },
+      "review": {
+        "alerts": {
+          "labels": [
+            "person",
+            "car"
+          ],
+          "required_zones": []
+        },
+        "detections": {
+          "required_zones": []
+        }
+      },
+      "semantic_search": {},
+      "snapshots": {
+        "enabled": false
+      },
+      "type": "generic",
+      "ui": {
+        "dashboard": true,
+        "order": 0
+      },
+      "zones": {}
+    }
+  },
+  "face_recognition": {
+    "enabled": false
+  },
+  "go2rtc": {
+    "streams": {}
+  },
+  "lpr": {
+    "enabled": true
+  },
+  "mqtt": {
+    "enabled": true
+  },
+  "notifications": {
+    "enabled": false
+  },
+  "semantic_search": {
+    "enabled": false
+  },
+  "ui": {
+    "time_format": "browser",
+    "unit_system": "metric"
+  },
+  "version": "0.18-0"
+}

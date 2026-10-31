@@ -1,0 +1,125 @@
+{
+  "cameras": {
+    "camera_1": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": true,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_10": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_2": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_3": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_4": {
+      "camera_fps": 5.1,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.1,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_5": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_6": {
+      "camera_fps": 0.0,
+      "connection_quality": "unusable",
+      "detection_enabled": false,
+      "detection_fps": 0,
+      "expected_fps": 5,
+      "process_fps": 0,
+      "reconnects_last_hour": 360,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_7": {
+      "camera_fps": 5.1,
+      "connection_quality": "excellent",
+      "detection_enabled": true,
+      "detection_fps": 0.2,
+      "expected_fps": 5,
+      "process_fps": 5.1,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_8": {
+      "camera_fps": 5.0,
+      "connection_quality": "excellent",
+      "detection_enabled": true,
+      "detection_fps": 22.8,
+      "expected_fps": 5,
+      "process_fps": 5.0,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    },
+    "camera_9": {
+      "camera_fps": 5.1,
+      "connection_quality": "excellent",
+      "detection_enabled": false,
+      "detection_fps": 0.0,
+      "expected_fps": 5,
+      "process_fps": 5.1,
+      "reconnects_last_hour": 0,
+      "skipped_fps": 0.0,
+      "stalls_last_hour": 0
+    }
+  },
+  "detection_fps": 23.0,
+  "detectors": {
+    "detector_1": {
+      "inference_speed": 2.16
+    }
+  },
+  "service": {
+    "latest_version": "0.18.2",
+    "uptime": 20505,
+    "version": "0.18.2-cfa08c5"
+  }
+}
