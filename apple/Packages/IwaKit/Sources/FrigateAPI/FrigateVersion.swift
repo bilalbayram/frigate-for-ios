@@ -85,3 +85,8 @@ public struct FrigateSupportPolicy: Sendable, Hashable {
         return .supported
     }
 }
+
+extension FrigateSupportPolicy {
+    /// The release line Iwa is built and tested against (fixtures in `fixtures/frigate/`).
+    public static let iwa = FrigateSupportPolicy(current: FrigateVersion(major: 0, minor: 18))
+}
