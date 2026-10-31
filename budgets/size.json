@@ -1,14 +1,14 @@
 {
   "ios": {
-    "download": 393216,
-    "install": 655360
+    "download": 458752,
+    "install": 983040
   },
   "macos": {
-    "download": 524288,
-    "install": 1048576
+    "download": 655360,
+    "install": 1638400
   },
   "tvos": {
-    "download": 393216,
-    "install": 655360
+    "download": 458752,
+    "install": 983040
   }
 }
