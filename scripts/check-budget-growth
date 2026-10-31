@@ -1,0 +1,50 @@
+#!/usr/bin/env -S python3 -I
+"""Fails when any number in budgets/*.json is larger than on the base commit.
+
+Usage: scripts/check-budget-growth <base-ref>
+
+Budgets only grow on purpose. CI runs this on pull requests and skips it when the PR carries the
+label named in the error (the same mechanism as T3 Code's agent context budget).
+"""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def leaves(value, path=""):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            yield from leaves(child, f"{path}.{key}" if path else key)
+    elif isinstance(value, (int, float)) and not isinstance(value, bool):
+        yield path, value
+
+
+def main() -> int:
+    if len(sys.argv) != 2:
+        print(__doc__.strip().splitlines()[2], file=sys.stderr)
+        return 2
+    base = sys.argv[1]
+    grown = []
+    for budget in sorted((ROOT / "budgets").glob("*.json")):
+        relative = budget.relative_to(ROOT).as_posix()
+        shown = subprocess.run(["git", "show", f"{base}:{relative}"], capture_output=True, text=True, cwd=ROOT)
+        if shown.returncode != 0:
+            continue  # New budget file: nothing to grow from.
+        before = dict(leaves(json.loads(shown.stdout)))
+        for key, value in leaves(json.loads(budget.read_text())):
+            if key in before and value > before[key]:
+                grown.append(f"{relative} {key}: {before[key]} -> {value}")
+    for line in grown:
+        print(f"error: budget grew: {line}", file=sys.stderr)
+    if grown:
+        print("Cut the growth, or have a maintainer add the label for that budget "
+              "(size.json: size-increase, perf.json: perf-increase, wire.json: wire-increase).", file=sys.stderr)
+    return 1 if grown else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

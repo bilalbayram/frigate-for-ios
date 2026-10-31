@@ -1,0 +1,101 @@
+#!/usr/bin/env -S python3 -I
+"""Builds unsigned Release bundles and compares their size with budgets/size.json.
+
+Usage:
+  scripts/app-size                     # build iOS, macOS, tvOS and check the budget
+  scripts/app-size --platforms ios     # just iOS
+  scripts/app-size --update            # after an intended increase: set limits to measured + headroom
+
+`download` is the bundle compressed with ditto, a stand-in for the App Store's thinned download
+size (which needs a signed export). `install` is the uncompressed bundle. Limits ratchet: they sit
+just above the current size, so every intended increase is a reviewed change to budgets/size.json,
+and CI rejects raising it without the `size-increase` label.
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BUDGET = ROOT / "budgets" / "size.json"
+DERIVED = ROOT / ".build" / "app-size"
+HEADROOM = 256 * 1024
+ROUND = 64 * 1024
+
+PLATFORMS = {
+    "ios": ("generic/platform=iOS", "Release-iphoneos"),
+    "macos": ("generic/platform=macOS", "Release"),
+    "tvos": ("generic/platform=tvOS", "Release-appletvos"),
+}
+
+
+def build(platform: str) -> Path:
+    destination, products = PLATFORMS[platform]
+    subprocess.run(
+        [
+            "xcodebuild", "-project", str(ROOT / "apple" / "Iwa.xcodeproj"), "-scheme", "Iwa",
+            "-configuration", "Release", "-destination", destination, "-derivedDataPath", str(DERIVED),
+            "CODE_SIGNING_ALLOWED=NO", "build", "-quiet",
+        ],
+        check=True,
+    )
+    return DERIVED / "Build" / "Products" / products / "Iwa.app"
+
+
+def measure(app: Path) -> dict[str, int]:
+    install = sum(p.stat().st_size for p in app.rglob("*") if p.is_file() and not p.is_symlink())
+    with tempfile.TemporaryDirectory() as tmp:
+        archive = Path(tmp) / "Iwa.zip"
+        subprocess.run(["ditto", "-c", "-k", "--keepParent", str(app), str(archive)], check=True)
+        download = archive.stat().st_size
+    return {"download": download, "install": install}
+
+
+def limit_for(measured: int) -> int:
+    return -(-(measured + HEADROOM) // ROUND) * ROUND
+
+
+def kib(value: int) -> str:
+    return f"{value / 1024:,.0f} KiB"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--platforms", default="ios,macos,tvos")
+    parser.add_argument("--update", action="store_true", help="set limits to measured size plus headroom")
+    args = parser.parse_args()
+
+    budget = json.loads(BUDGET.read_text())
+    rows, failures = [], []
+    for platform in args.platforms.split(","):
+        measured = measure(build(platform))
+        limits = budget.setdefault(platform, {})
+        for metric, value in measured.items():
+            if args.update:
+                limits[metric] = limit_for(value)
+            limit = limits.get(metric)
+            ok = limit is not None and value <= limit
+            rows.append(f"| {platform} | {metric} | {kib(value)} | {kib(limit) if limit else '—'} | {'✅' if ok else '❌'} |")
+            if not ok:
+                failures.append(f"{platform} {metric} is {kib(value)}, budget {kib(limit) if limit else 'missing'}")
+
+    if args.update:
+        BUDGET.write_text(json.dumps(budget, indent=2, sort_keys=True) + "\n")
+
+    table = "\n".join(["| Platform | Metric | Size | Budget | |", "|---|---|---|---|---|", *rows])
+    print(table)
+    if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(summary, "a") as handle:
+            handle.write("### App size\n\n" + table + "\n")
+    for failure in failures:
+        print(f"error: {failure}. If the increase is intended, run scripts/app-size --update and "
+              "add the size-increase label.", file=sys.stderr)
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

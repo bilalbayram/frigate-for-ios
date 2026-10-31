@@ -1,0 +1,84 @@
+#!/usr/bin/env -S python3 -I
+"""Checks a built Iwa.app for the privacy and dependency guardrails in AGENTS.md.
+
+Usage: scripts/check-app-bundle path/to/Iwa.app [more.app ...]
+
+- App Transport Security allows local networking only (no arbitrary loads, no exception domains).
+- PrivacyInfo.xcprivacy is bundled, declares no tracking, and gives a reason for every API category.
+- Usage descriptions exist for every permission the app asks for.
+- Embedded frameworks are on the allowlist below, so a new dependency is a reviewed change.
+"""
+
+import plistlib
+import sys
+from pathlib import Path
+
+# Frameworks allowed inside the app bundle. Adding one needs a reason and its size cost in the PR.
+ALLOWED_FRAMEWORKS: set[str] = set()
+
+REQUIRED_USAGE_DESCRIPTIONS = {
+    "ios": ["NSLocalNetworkUsageDescription", "NSMicrophoneUsageDescription", "NSCameraUsageDescription"],
+    "tvos": [],
+    "macos": ["NSMicrophoneUsageDescription", "NSCameraUsageDescription"],
+}
+
+
+def layout(app: Path) -> tuple[str, Path, Path, Path]:
+    """Returns (platform, Info.plist, resources dir, frameworks dir) for an iOS/tvOS or macOS bundle."""
+    if (app / "Contents" / "Info.plist").exists():
+        contents = app / "Contents"
+        return "macos", contents / "Info.plist", contents / "Resources", contents / "Frameworks"
+    info = plistlib.loads((app / "Info.plist").read_bytes())
+    platforms = info.get("CFBundleSupportedPlatforms", [])
+    platform = "tvos" if any(p.startswith("AppleTV") for p in platforms) else "ios"
+    return platform, app / "Info.plist", app, app / "Frameworks"
+
+
+def check(app: Path) -> list[str]:
+    problems: list[str] = []
+    platform, info_path, resources, frameworks = layout(app)
+    info = plistlib.loads(info_path.read_bytes())
+
+    ats = info.get("NSAppTransportSecurity")
+    if ats != {"NSAllowsLocalNetworking": True}:
+        problems.append(f"NSAppTransportSecurity must be exactly {{NSAllowsLocalNetworking: true}}, got {ats!r}")
+
+    for key in REQUIRED_USAGE_DESCRIPTIONS[platform]:
+        if not str(info.get(key, "")).strip():
+            problems.append(f"missing usage description {key}")
+
+    manifest_path = resources / "PrivacyInfo.xcprivacy"
+    if not manifest_path.exists():
+        problems.append("PrivacyInfo.xcprivacy is not bundled")
+    else:
+        manifest = plistlib.loads(manifest_path.read_bytes())
+        if manifest.get("NSPrivacyTracking") is not False:
+            problems.append("NSPrivacyTracking must be false")
+        if manifest.get("NSPrivacyTrackingDomains"):
+            problems.append("NSPrivacyTrackingDomains must be empty")
+        for entry in manifest.get("NSPrivacyAccessedAPITypes", []):
+            if not entry.get("NSPrivacyAccessedAPITypeReasons"):
+                problems.append(f"no reason given for {entry.get('NSPrivacyAccessedAPIType')}")
+
+    embedded = {p.name for p in frameworks.glob("*.framework")} if frameworks.exists() else set()
+    for name in sorted(embedded - ALLOWED_FRAMEWORKS):
+        problems.append(f"framework {name} is not on the allowlist in scripts/check-app-bundle")
+
+    return [f"{app.name} ({platform}): {problem}" for problem in problems]
+
+
+def main() -> int:
+    apps = [Path(arg) for arg in sys.argv[1:]]
+    if not apps:
+        print(__doc__.strip().splitlines()[2], file=sys.stderr)
+        return 2
+    problems = [problem for app in apps for problem in check(app)]
+    for problem in problems:
+        print(f"error: {problem}", file=sys.stderr)
+    if not problems:
+        print(f"check-app-bundle: {len(apps)} bundle(s) OK")
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

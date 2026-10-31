@@ -23,7 +23,9 @@ targets:
   Iwa:
     type: application
     supportedDestinations: [iOS, macOS, tvOS]
-    sources: [Iwa]
+    sources:
+      - path: Iwa
+        excludes: [Info.plist]
     dependencies:
       - package: IwaKit
         product: FrigateAPI
@@ -35,6 +37,7 @@ targets:
         PRODUCT_NAME: Iwa
         INFOPLIST_KEY_CFBundleDisplayName: Iwa
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Iwa/Info.plist
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         TARGETED_DEVICE_FAMILY: "1,2,3"
