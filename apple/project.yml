@@ -55,10 +55,24 @@ targets:
         ENABLE_RESOURCE_ACCESS_CAMERA[sdk=macosx*]: YES
         ENABLE_HARDENED_RUNTIME[sdk=macosx*]: YES
 
+  IwaUITests:
+    type: bundle.ui-testing
+    supportedDestinations: [iOS]
+    sources: [IwaUITests]
+    dependencies:
+      - target: Iwa
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bilalbayram.iwa.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        # XCTestCase is nonisolated; tests that drive the app opt into the main actor themselves.
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        TEST_TARGET_NAME: Iwa
+
 schemes:
   Iwa:
     build:
       targets:
         Iwa: all
     test:
-      targets: []
+      targets: [IwaUITests]
