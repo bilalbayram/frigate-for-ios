@@ -70,16 +70,11 @@ public struct Route: Identifiable, Hashable, Sendable, Codable {
 
 /// A route whose identity check matched the saved server.
 ///
-/// Only `RouteRace` creates these, so a transport that takes a `VerifiedRoute`
-/// can't be handed a credential for a route nobody checked.
+/// Only `RouteRace` creates these (the memberwise initializer is internal), so a transport that
+/// takes a `VerifiedRoute` can't be handed a credential for a route nobody checked.
 public struct VerifiedRoute: Hashable, Sendable {
     public let route: Route
     public let identity: ServerIdentity
-
-    init(route: Route, identity: ServerIdentity) {
-        self.route = route
-        self.identity = identity
-    }
 }
 
 /// Scheme, host, and port of an http(s) URL, normalized so equal origins compare equal.
@@ -90,8 +85,8 @@ struct Origin: Hashable {
 
     init?(_ url: URL) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let scheme = components.scheme?.lowercased(), scheme == "http" || scheme == "https",
-              let host = components.host?.lowercased(), !host.isEmpty
+            let scheme = components.scheme?.lowercased(), scheme == "http" || scheme == "https",
+            let host = components.host?.lowercased(), !host.isEmpty
         else { return nil }
         self.scheme = scheme
         self.host = host

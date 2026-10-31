@@ -93,10 +93,11 @@ public struct RouteRace: Sendable {
 
     public mutating func probeFinished(_ id: Route.ID, _ result: ProbeResult) -> [Action] {
         guard !isFinished else { return [] }
-        let state: ProbeState = switch result {
-        case .answered(let identity): .answered(identity)
-        case .silent: .silent
-        }
+        let state: ProbeState =
+            switch result {
+            case .answered(let identity): .answered(identity)
+            case .silent: .silent
+            }
         if inFlight == .patientProbe(id) {
             inFlight = nil
             probes[id] = state
@@ -123,29 +124,40 @@ public struct RouteRace: Sendable {
 
     private mutating func advance() -> [Action] {
         guard !isFinished, inFlight == nil else { return [] }
-
         if retryQueue == nil {
-            while cursor < routes.count {
-                let id = routes[cursor].id
-                switch probes[id] {
-                case .answered(let identity) where identity == expected:
-                    cursor += 1
-                    return attemptConnect(id)
-                case .answered:
-                    sawMismatch = true
-                case .silent:
-                    deferred.append(id)
-                case .pending, nil:
-                    guard isPastHeadStart else { return [] }
-                    deferred.append(id)
-                }
-                cursor += 1
-            }
+            if let actions = walkInOrder() { return actions }
             if deferred.contains(where: { probes[$0] == .pending }) { return [] }
             let lateAnswers = deferred.filter { probes[$0] != .silent }
             retryQueue = lateAnswers + deferred.filter { probes[$0] == .silent }
         }
+        if let actions = retryDeferred() { return actions }
+        if sawConnectFailure { return finish(.connectFailed) }
+        return finish(sawMismatch ? .identityMismatch : .unreachable)
+    }
 
+    /// The first pass, in route order. Returns actions to run, or `nil` once every route was visited.
+    private mutating func walkInOrder() -> [Action]? {
+        while cursor < routes.count {
+            let id = routes[cursor].id
+            switch probes[id] {
+            case .answered(let identity) where identity == expected:
+                cursor += 1
+                return attemptConnect(id)
+            case .answered:
+                sawMismatch = true
+            case .silent:
+                deferred.append(id)
+            case .pending, nil:
+                guard isPastHeadStart else { return [] }
+                deferred.append(id)
+            }
+            cursor += 1
+        }
+        return nil
+    }
+
+    /// The retry pass over deferred routes. Returns actions to run, or `nil` once the queue is empty.
+    private mutating func retryDeferred() -> [Action]? {
         while let id = retryQueue?.first {
             retryQueue?.removeFirst()
             switch probes[id] {
@@ -161,9 +173,7 @@ public struct RouteRace: Sendable {
                 assertionFailure("Deferred probes settle before the retry pass")
             }
         }
-
-        if sawConnectFailure { return finish(.connectFailed) }
-        return finish(sawMismatch ? .identityMismatch : .unreachable)
+        return nil
     }
 
     private mutating func attemptConnect(_ id: Route.ID) -> [Action] {

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Repository rules that no linter covers. Usage: scripts/check-repo-hygiene [files...]
+# With no files, checks every tracked file.
+#
+# - No screenshots or videos outside asset folders: PR evidence belongs in the PR, not the repo.
+# - No secrets by file type (APNs keys, certificates, env files).
+# - Rust tests don't wait on real time, and ignored tests carry a quarantine issue.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+if [ "$#" -gt 0 ]; then files=("$@"); else
+  files=()
+  while IFS= read -r line; do files+=("$line"); done < <(git ls-files)
+fi
+
+status=0
+fail() { echo "error: $1" >&2; status=1; }
+
+for file in "${files[@]}"; do
+  [ -e "$file" ] || continue
+  case "$file" in
+    *.png|*.jpg|*.jpeg|*.gif|*.heic|*.mov|*.mp4|*.webm)
+      case "$file" in
+        assets/*|*.xcassets/*|.agents/skills/*/assets/*|fixtures/*) ;;
+        *) fail "$file: media outside assets/, *.xcassets, or fixtures/ (attach PR evidence to the PR instead)" ;;
+      esac ;;
+  esac
+  case "$file" in
+    *.p8|*.p12|*.pem|*.key|*.mobileprovision|.env|.env.*|*/.env|*/.env.*|*.dev.vars)
+      fail "$file: secret-bearing file type must not be committed" ;;
+  esac
+  case "$file" in
+    server/*.rs)
+      # Test code is everything after `#[cfg(test)]`, or the whole file under a tests/ directory.
+      in_tests=0; case "$file" in */tests/*) in_tests=1 ;; esac
+      if awk -v all="$in_tests" '
+          /#\[cfg\(test\)\]/ { all = 1 }
+          all && /thread::sleep|tokio::time::sleep|Instant::now\(\)|SystemTime::now\(\)/ { print FILENAME ":" NR ": " $0; found = 1 }
+          END { exit !found }' "$file" >&2; then
+        fail "$file: tests must not wait on or read real time; inject a clock"
+      fi
+      if grep -n '#\[ignore' "$file" | grep -v 'quarantine: #[0-9]' >&2; then
+        fail "$file: ignored tests need #[ignore = \"quarantine: #123 <why>\"]"
+      fi ;;
+  esac
+done
+
+exit "$status"

@@ -29,8 +29,8 @@ struct HostAddress {
             }
         }
         if let ipv6 {
-            return ipv6[0] & 0xfe00 == 0xfc00 // fc00::/7 unique local
-                || ipv6[0] & 0xffc0 == 0xfe80 // fe80::/10 link local
+            return ipv6[0] & 0xfe00 == 0xfc00  // fc00::/7 unique local
+                || ipv6[0] & 0xffc0 == 0xfe80  // fe80::/10 link local
         }
         let localSuffixes = [".local", ".lan", ".home", ".internal", ".home.arpa"]
         return !host.contains(".") || localSuffixes.contains { host.hasSuffix($0) }

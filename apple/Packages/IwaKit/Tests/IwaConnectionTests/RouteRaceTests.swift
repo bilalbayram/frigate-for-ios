@@ -209,10 +209,11 @@ struct RouteRacePropertyTests {
             case .headStart:
                 handle(race.headStartEnded())
             case .probe(let id, let urgency):
-                let result: RouteRace.ProbeResult = switch (behavior[id]!, urgency) {
-                case (.answers(let identity), _), (.answersSlowly(let identity), .patient): .answered(identity)
-                case (.answersSlowly, .quick), (.silent, _): .silent
-                }
+                let result: RouteRace.ProbeResult =
+                    switch (behavior[id]!, urgency) {
+                    case (.answers(let identity), _), (.answersSlowly(let identity), .patient): .answered(identity)
+                    case (.answersSlowly, .quick), (.silent, _): .silent
+                    }
                 handle(race.probeFinished(id, result))
             case .connect(let id):
                 handle(race.connectFinished(id, connectResult[id]!))

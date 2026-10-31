@@ -48,7 +48,9 @@ The most common defect is a change that works on the path you tested and nowhere
 
 ## Verifying
 
-Run the narrowest command that proves what you changed, and say exactly what you ran (scheme, destination, filter):
+Before you commit, run `scripts/check-changed`. It runs CI's fast checks for what you touched: swift-format, SwiftLint, the IwaKit tests, the app build for the platforms you touched, Rust format/clippy/tests, and gitleaks when installed. CI still runs everything.
+
+While you iterate, run the narrowest command that proves what you changed, and say exactly what you ran (scheme, destination, filter):
 
 ```sh
 cd apple/Packages/IwaKit && swift test --filter RouteKindTests
@@ -57,7 +59,9 @@ cd apple && xcodegen generate && xcodebuild -project Iwa.xcodeproj -scheme Iwa \
 cd server && cargo test -p iwa-protocol
 ```
 
-Build every platform you touched (iOS Simulator, `platform=macOS`, tvOS Simulator). CI runs everything else.
+Build every platform you touched (iOS Simulator, `generic/platform=macOS`, tvOS Simulator); `scripts/check-changed --all-platforms` does all three. CI runs everything else. `scripts/install-hooks` adds a pre-commit hook with the fastest checks.
+
+UI and launch tests (`IwaUITests`) need macOS Automation Mode. Enable it once with `automationmodetool enable-automationmode-without-authentication` (asks for your password), or leave them to the nightly CI run.
 
 ## Tests
 
@@ -65,13 +69,16 @@ Build every platform you touched (iOS Simulator, `platform=macOS`, tvOS Simulato
 - Extend before adding. Add a row to an existing parameterized `@Test(arguments:)` when one fits.
 - Test at the lowest layer that fails without the fix. Don't repeat a case in Swift and Rust unless it's a shared test vector in `fixtures/`.
 - A logic, data, protocol or security bug gets a failing test first, then the fix. A purely visual bug gets before and after screenshots instead of a test.
-- **Time is injected.** Connection, retry and cooldown code takes a `Clock`. Tests advance a test clock. These are banned in tests: `Task.sleep`, `Thread.sleep`, `Date()` deltas, polling loops, per-test timeouts and retries. A flaky test gets fixed, never retried.
-- Skipping a test (`.disabled`, `#[ignore]`) needs the tracking issue on the line above: `// quarantine: #123 <why>`.
+- **No real time in tests.** Decision logic is a pure state machine fed with events (see `RouteRace`), or takes an injected `Clock`. These are banned in tests, and SwiftLint enforces it: `Task.sleep`, `Thread.sleep`, `Date()`/`.now` deltas, polling loops, `.timeLimit`, and retries. A flaky test gets fixed, never retried.
+- Random inputs come from a seeded generator (`SplitMix64` in the test fixtures), so a failing seed reproduces exactly.
+- Skipping a test needs its tracking issue in the reason: `.disabled("quarantine: #123 <why>")` in Swift, `#[ignore = "quarantine: #123 <why>"]` in Rust.
 - Use Swift Testing (`@Test`, `#expect`, `#require`) for new tests. Use XCTest only for UI automation and performance metrics.
 
 ## Budgets
 
-These are the starting budgets. CI enforces them through checked-in budget files that may only grow when a PR carries the matching label.
+Budget files live in `budgets/` and may only grow when a PR carries the matching label (`size-increase`, `perf-increase`, `wire-increase`); `scripts/check-budget-growth` enforces it in CI. App size ratchets: `scripts/app-size` fails above `budgets/size.json`, and `scripts/app-size --update` resets the limits after an intended increase. Changes to permissions, entitlements, ATS, the privacy manifest, or the framework allowlist in `scripts/check-app-bundle` need the `privacy-reviewed` label.
+
+Targets as the app grows:
 
 | Budget | Limit |
 |---|---|

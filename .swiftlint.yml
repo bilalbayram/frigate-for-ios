@@ -1,0 +1,86 @@
+# Formatting is owned by swift-format (.swift-format). SwiftLint enforces correctness and the
+# repository's own rules (AGENTS.md: Tests, Layout, Taste).
+
+included:
+  - apple
+excluded:
+  - apple/Packages/IwaKit/.build
+  - apple/Iwa.xcodeproj
+
+disabled_rules:
+  # swift-format decides layout.
+  - trailing_comma
+  - opening_brace
+  - line_length
+  - vertical_whitespace
+  - trailing_whitespace
+  - indentation_width
+  - statement_position
+  - closure_parameter_position
+  # Raw-identifier test names and short names like `id` are fine.
+  - identifier_name
+  - type_name
+  - nesting
+  - force_unwrapping
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - contains_over_filter_count
+  - discouraged_optional_boolean
+  - fatal_error_message
+  - private_swiftui_state
+  - unowned_variable_capture
+  - weak_delegate
+
+custom_rules:
+  # Tests: time is injected. No real waiting, no wall clock, no retries (AGENTS.md › Tests).
+  no_real_time_wait_in_tests:
+    included: '.*Tests/.*\.swift$'
+    regex: '\b(Task\.sleep|Thread\.sleep|usleep|sleep\(|DispatchQueue\.main\.asyncAfter)'
+    message: 'Tests must not wait on real time. Inject a clock or drive the state machine with events.'
+    severity: error
+  no_wall_clock_in_tests:
+    included: '.*Tests/.*\.swift$'
+    regex: '\b(Date\(\)|Date\.now|ContinuousClock\.now|SuspendingClock\.now|CFAbsoluteTimeGetCurrent)'
+    message: 'Tests assert on events and counts, not elapsed time.'
+    severity: error
+  no_test_time_limit:
+    included: '.*Tests/.*\.swift$'
+    regex: '\.timeLimit\('
+    message: 'No per-test timeouts. A test that needs one is wrong.'
+    severity: error
+  no_unreasoned_disabled_test:
+    included: '.*Tests/.*\.swift$'
+    regex: '\.disabled\((?!"quarantine: #\d+)'
+    message: 'Disabled tests need a tracking issue: .disabled("quarantine: #123 <why>").'
+    severity: error
+
+  # Library modules stay UI-free and nonisolated (AGENTS.md › Layout).
+  library_imports_ui:
+    included: '.*/Packages/IwaKit/Sources/.*\.swift$'
+    regex: '^\s*import\s+(SwiftUI|UIKit|AppKit)\b'
+    message: 'IwaKit library modules must not import UI frameworks.'
+    severity: error
+  library_main_actor:
+    included: '.*/Packages/IwaKit/Sources/.*\.swift$'
+    regex: '@MainActor'
+    message: 'IwaKit library APIs are nonisolated; let the caller decide where work runs.'
+    severity: error
+
+  # Privacy (AGENTS.md › What we never compromise on).
+  no_print:
+    included: '.*/(Sources|Iwa)/.*\.swift$'
+    regex: '(^|\s)(print|debugPrint|NSLog)\('
+    message: 'Use Logger with privacy annotations.'
+    severity: error
+  no_public_privacy_on_secrets:
+    regex: '\\\((token|password|secret|credential|jwt|cookie)[^)]*privacy:\s*\.public'
+    message: 'Never log secrets as .public.'
+    severity: error
+
+cyclomatic_complexity:
+  ignores_case_statements: true
+function_body_length:
+  warning: 80
+  error: 120

@@ -36,7 +36,7 @@ extension Array where Element == Route {
                 continue
             }
             guard let origin = route.origin, let address, !known.contains(origin),
-                  !sendsCredentialInClear(origin: origin, isTailscale: address.isTailscale, credentialRouteID: route.credentialRouteID)
+                !sendsCredentialInClear(origin: origin, isTailscale: address.isTailscale, credentialRouteID: route.credentialRouteID)
             else { continue }
             known.insert(origin)
             next.append(route.withConfirmedTailscale(address.isTailscale))
@@ -46,7 +46,7 @@ extension Array where Element == Route {
         for origin in reportedOrder where !known.contains(origin) {
             let address = reportedByOrigin[origin]!
             guard !sendsCredentialInClear(origin: origin, isTailscale: address.isTailscale, credentialRouteID: credentialRouteID),
-                  let route = Route.direct(origin.url, source: .learned(via: credentialRouteID), confirmedTailscale: address.isTailscale)
+                let route = Route.direct(origin.url, source: .learned(via: credentialRouteID), confirmedTailscale: address.isTailscale)
             else { continue }
             known.insert(origin)
             next = insertingByRank(route, into: next) { $0.kind }
@@ -63,7 +63,7 @@ extension Array where Element == Route {
     private func sendsCredentialInClear(origin: Origin, isTailscale: Bool, credentialRouteID: Route.ID) -> Bool {
         guard origin.isPlainHTTP, !isTailscale, !HostAddress(origin.host).isTailnet else { return false }
         guard let credentialRoute = first(where: { $0.id == credentialRouteID }),
-              let credentialOrigin = credentialRoute.origin
+            let credentialOrigin = credentialRoute.origin
         else { return true }
         let plainOverLANOrPublic = credentialOrigin.isPlainHTTP && [.lan, .public].contains(credentialRoute.kind)
         return !plainOverLANOrPublic

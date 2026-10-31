@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# CI's fast checks for what you touched since the merge base with main, plus uncommitted work.
+#
+# Usage: scripts/check-changed [--all-platforms] [--all]
+#   --all-platforms  build macOS and tvOS too (default: iOS Simulator only)
+#   --all            check every file, as if everything changed
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+all_platforms=0; all=0
+for arg in "$@"; do
+  case "$arg" in
+    --all-platforms) all_platforms=1 ;;
+    --all) all=1 ;;
+    *) echo "unknown option $arg" >&2; exit 2 ;;
+  esac
+done
+
+base_ref=origin/main
+git rev-parse -q --verify "$base_ref" >/dev/null || base_ref=main
+base=$(git merge-base HEAD "$base_ref")
+if [ "$all" -eq 1 ]; then
+  changed=$(git ls-files)
+else
+  changed=$({ git diff --name-only "$base"; git diff --name-only --cached; git ls-files --others --exclude-standard; } | sort -u)
+fi
+if [ -z "$changed" ]; then echo "check-changed: nothing changed since $base_ref"; exit 0; fi
+
+touched() { printf '%s\n' "$changed" | grep -Eq "$1"; }
+existing() { printf '%s\n' "$changed" | grep -E "$1" | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done; }
+step() { printf '\n\033[1m▸ %s\033[0m\n' "$1"; }
+
+lint_config='^(\.swift-format|\.swiftlint\.yml)$'
+
+step "repo hygiene"
+hygiene_files=()
+while IFS= read -r f; do hygiene_files+=("$f"); done < <(printf '%s\n' "$changed" | while IFS= read -r f; do [ -e "$f" ] && printf '%s\n' "$f"; done)
+[ "${#hygiene_files[@]}" -eq 0 ] || scripts/check-repo-hygiene "${hygiene_files[@]}"
+
+if touched '\.swift$' || touched "$lint_config"; then
+  if touched "$lint_config"; then swift_files=$(git ls-files 'apple/*.swift'); else swift_files=$(existing '^apple/.*\.swift$'); fi
+  if [ -n "$swift_files" ]; then
+    step "swift-format"
+    # shellcheck disable=SC2086
+    swift format lint --strict $swift_files
+    step "SwiftLint"
+    # shellcheck disable=SC2086
+    swiftlint lint --strict --quiet $swift_files
+  fi
+fi
+
+if touched '^apple/Packages/IwaKit/'; then
+  step "IwaKit tests"
+  (cd apple/Packages/IwaKit && swift test --quiet)
+fi
+
+if touched '^apple/(Iwa/|project\.yml|Packages/)'; then
+  step "Xcode project"
+  (cd apple && xcodegen generate --quiet)
+  destinations=("generic/platform=iOS Simulator")
+  [ "$all_platforms" -eq 1 ] && destinations+=("generic/platform=macOS" "generic/platform=tvOS Simulator")
+  for destination in "${destinations[@]}"; do
+    step "build $destination"
+    xcodebuild -project apple/Iwa.xcodeproj -scheme Iwa -destination "$destination" \
+      -derivedDataPath .build/check-changed CODE_SIGNING_ALLOWED=NO build -quiet
+  done
+  step "app bundle"
+  scripts/check-app-bundle .build/check-changed/Build/Products/Debug-iphonesimulator/Iwa.app
+fi
+
+if touched '^server/'; then
+  if command -v cargo >/dev/null; then
+    step "Rust"
+    (cd server && cargo fmt --check && cargo clippy --all-targets --quiet -- -D warnings && cargo test --quiet)
+  else
+    echo "warning: cargo not installed; skipping Rust checks (CI runs them)" >&2
+  fi
+fi
+
+if command -v gitleaks >/dev/null; then
+  step "gitleaks"
+  gitleaks protect --staged --redact --no-banner
+else
+  echo "warning: gitleaks not installed; skipping secret scan (brew install gitleaks; CI runs it)" >&2
+fi
+
+printf '\n\033[32m✓ check-changed passed\033[0m\n'
