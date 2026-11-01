@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CI's fast checks for what you touched since the merge base with main, plus uncommitted work.
+# CI's fast checks for what you touched since the merge base with master, plus uncommitted work.
 #
 # Usage: scripts/check-changed [--all-platforms] [--all]
 #   --all-platforms  build macOS and tvOS too (default: iOS Simulator only)
@@ -16,8 +16,8 @@ for arg in "$@"; do
   esac
 done
 
-base_ref=origin/main
-git rev-parse -q --verify "$base_ref" >/dev/null || base_ref=main
+base_ref=origin/master
+git rev-parse -q --verify "$base_ref" >/dev/null || base_ref=master
 base=$(git merge-base HEAD "$base_ref")
 if [ "$all" -eq 1 ]; then
   changed=$(git ls-files)
